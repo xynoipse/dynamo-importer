@@ -1,0 +1,21 @@
+{
+  "name": "dynamo-importer",
+  "version": "1.0.0",
+  "description": "DynamoDB Importer Node.js Lambda Function",
+  "main": "index.js",
+  "scripts": {
+    "generate-data": "node data-generator/generate.js ",
+    "_sam_build": "sam build --profile jason --template app.yaml",
+    "_sam_package": "sam package --profile jason --output-template-file app-packaged.yaml --s3-bucket js.aws.s3.lambda --s3-prefix dynamo-importer",
+    "_sam_deploy": "sam deploy --profile jason --template-file app-packaged.yaml --stack-name  dynamo-importer --capabilities CAPABILITY_IAM --region us-west-2",
+    "deploy": "npm run _sam_build && npm run _sam_package && npm run _sam_deploy"
+  },
+  "author": "Jason",
+  "license": "ISC",
+  "dependencies": {
+    "fast-csv": "^4.3.6"
+  },
+  "devDependencies": {
+    "mocker-data-generator": "^2.12.0"
+  }
+}

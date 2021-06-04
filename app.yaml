@@ -1,0 +1,36 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A Lamnda to import data from S3 to DynamoDB
+
+Parameters:
+  AppName:
+    Default: dynamo-importer
+    Type: String
+    Description: Name of app
+  AppEnvironment:
+    Default: prod
+    Type: String
+    Description: Environment of this stack
+
+Resources:
+  ImportLambdaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Join ['', [!Ref AppName, '-worker']]
+      MemorySize: 2048
+      Runtime: nodejs12.x
+      CodeUri: app/lambda/importer/
+      Handler: app.handler
+      Timeout: 300
+      Environment:
+        Variables:
+          CONCURRENT_BATCH_SUBMITS: 20
+          READ_AHEAD_BATCHES: 40
+          MAX_ROWS_SUBMIT: 10000
+          AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
+      Policies:
+        - AmazonDynamoDBFullAccess
+        - AmazonS3FullAccess
+      Tags:
+        APPNAME: !Ref AppName
+        ENVIRONMENT: !Ref AppEnvironment
