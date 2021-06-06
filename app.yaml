@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: A Lamnda to import data from S3 to DynamoDB
+Description: A Lambda to import data from S3 to DynamoDB
 
 Parameters:
   AppName:
@@ -24,13 +24,14 @@ Resources:
       Timeout: 300
       Environment:
         Variables:
+          DYNAMO_TABLE_NAME: 'TableName'
           CONCURRENT_BATCH_SUBMITS: 20
           READ_AHEAD_BATCHES: 40
-          MAX_ROWS_SUBMIT: 10000
+          MAX_ROWS_SUBMIT: 0
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - AmazonDynamoDBFullAccess
-        - AmazonS3FullAccess
+        - AmazonS3ReadOnlyAccess
       Tags:
         APPNAME: !Ref AppName
         ENVIRONMENT: !Ref AppEnvironment

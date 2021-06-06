@@ -233,29 +233,19 @@ async function S3ToDynamo(
 }
 
 module.exports.handler = async (event, context) => {
-  const { FROM, DYNAMO_TABLE_NAME, S3_BUCKET_NAME, S3_FILE_NAME, MAX_ROWS_SUBMIT } =
-    event;
+  const { eventSource, awsRegion, s3 } = event.Records[0];
+  console.log('AWS Region', awsRegion);
 
-  e = {
-    FROM,
-    DYNAMO_TABLE_NAME,
-    S3_BUCKET_NAME,
-    S3_FILE_NAME,
-    MAX_ROWS_SUBMIT:
-      MAX_ROWS_SUBMIT === undefined ? process.env.MAX_ROWS_SUBMIT : MAX_ROWS_SUBMIT || 0,
-  };
+  if (eventSource === 'aws:s3') {
+    const { bucket, object } = s3;
 
-  console.log('AWS Region', aws.config.region);
-  console.log('Event', e);
-
-  if (event.FROM === 's3') {
     return await S3ToDynamo(
-      e.S3_BUCKET_NAME,
-      e.S3_FILE_NAME,
-      e.DYNAMO_TABLE_NAME,
+      bucket.name,
+      object.key,
+      process.env.DYNAMO_TABLE_NAME,
       parseInt(process.env.CONCURRENT_BATCH_SUBMITS),
       parseInt(process.env.READ_AHEAD_BATCHES),
-      parseInt(e.MAX_ROWS_SUBMIT)
+      parseInt(process.env.MAX_ROWS_SUBMIT)
     );
   }
 };

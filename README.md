@@ -6,6 +6,7 @@ A Node.js Lambda function streams a S3 File and then imports it into DynamoDB us
 
 ### Environment variables passed to the function:
 
+- DYNAMO_TABLE_NAME: DynamoDB table name where we will import into
 - CONCURRENT_BATCH_SUBMITS: Make reference to the article, this is the amount of concurrent batch api writes made to the DynamoDB table
 - READ_AHEAD_BATCHES: Make reference to the article, this is the amount of batches that will be read from the stream before they will be sent to DynamoDB at the CONCURRENT_BATCH_SUBMITS rate. This value must be greater or equal to CONCURRENT_BATCH_SUBMITS.
 - MAX_ROWS_SUBMIT: Used for testing, setting to 0 means import everything, else stop the import when this amount of rows has been imported.
@@ -14,29 +15,11 @@ A Node.js Lambda function streams a S3 File and then imports it into DynamoDB us
 Example:
 
 ```
+DYNAMO_TABLE_NAME: 'TableName'
 CONCURRENT_BATCH_SUBMITS: 20
 READ_AHEAD_BATCHES: 40
-MAX_ROWS_SUBMIT: 10000
+MAX_ROWS_SUBMIT: 0
 AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
-```
-
-### Lambda Function Event Object:
-
-- DYNAMO_TABLE_NAME: DynamoDB table name where we will import into
-- S3_BUCKET_NAME: Name of the bucket where the CSV is stored
-- S3_FILE_NAME: Name of the CSV file in the bucket
-- MAX_ROWS_SUBMIT: Used for testing, setting to 0 means import everything, else stop the import when this amount of rows has been imported. if not specified in the object, default will be 100 rows. (note: it will throw an error when max rows reached)
-
-Example:
-
-```
-{
-  "FROM": "s3",
-  "DYNAMO_TABLE_NAME": "TableName",
-  "S3_BUCKET_NAME": "aws.s3.bucket.name",
-  "S3_FILE_NAME": "path/to/file.csv",
-  "MAX_ROWS_SUBMIT": 10000
-}
 ```
 
 ### Requirements
@@ -55,6 +38,8 @@ Example:
 
 4. Run the `npm run deploy` npm command to let SAM build, package and deploy your CloudFormation
 
+5. Create a S3 Trigger or S3 Event notification for the Lambda function. (Note: S3 Bucket must be on the same region of the Lambda function)
+
 ### Batteries included
 
 #### Data generation tool
@@ -71,9 +56,3 @@ A large CSV file containing 1,000,000 records that will be roughly around 80MB+.
 
 - After deploying, check your [**CloudFormation**](https://us-west-2.console.aws.amazon.com/cloudformation/home?region=us-west-2#/stacks) for stack created and named `dynamo-importer`
 - You can go to the [**AWS Lambda > Functions**](https://us-west-2.console.aws.amazon.com/lambda/home?region=us-west-2#/functions), you should see lambda function named `dynamo-importer-worker`
-
-### Invoking a Lambda function
-
-- Open your lambda function from the **AWS Lambda > Functions** and below after Function overview, go to tab Test
-- Add your proper `Lambda Function Event Object` to run the lamdba function, more info about this lamdba function accepted event object [here](#lambda-function-event-object)
-- Recommended to name and save the event in Test event
