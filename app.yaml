@@ -25,13 +25,14 @@ Resources:
       Environment:
         Variables:
           DYNAMO_TABLE_NAME: 'TableName'
+          DELETE_S3_FILE: true
           CONCURRENT_BATCH_SUBMITS: 20
           READ_AHEAD_BATCHES: 40
           MAX_ROWS_SUBMIT: 0
           AWS_NODEJS_CONNECTION_REUSE_ENABLED: 1
       Policies:
         - AmazonDynamoDBFullAccess
-        - AmazonS3ReadOnlyAccess
+        - AmazonS3FullAccess
       Tags:
         APPNAME: !Ref AppName
         ENVIRONMENT: !Ref AppEnvironment

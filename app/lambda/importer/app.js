@@ -206,30 +206,43 @@ async function ImportStreamToDynamo(
   });
 }
 
+async function DeleteS3Object(Bucket, Key) {
+  const deleteObjectParams = { Bucket, Key };
+
+  try {
+    s3Client.deleteObject(deleteObjectParams).promise();
+  } catch (err) {
+    throw err;
+  }
+}
+
 async function S3ToDynamo(
-  csvBucket,
-  csvKey,
+  Bucket,
+  Key,
   tableName,
+  deleteS3File,
   concurrentBatchSubmit,
   readAheadBatchSubmit,
   maxRowsProcess
 ) {
   console.log('Start S3ToDynamo');
 
-  let s3DataReadStream = s3Client
-    .getObject({ Bucket: csvBucket, Key: csvKey })
-    .createReadStream();
+  let s3DataReadStream = s3Client.getObject({ Bucket, Key }).createReadStream();
   s3DataReadStream.on('error', (streamErr) => {
     throw new Error(streamErr);
   });
 
-  return ImportStreamToDynamo(
+  const res = await ImportStreamToDynamo(
     s3DataReadStream,
     tableName,
     concurrentBatchSubmit,
     readAheadBatchSubmit,
     maxRowsProcess
   );
+
+  if (deleteS3File) DeleteS3Object(Bucket, Key);
+
+  return res;
 }
 
 module.exports.handler = async (event, context) => {
@@ -243,6 +256,7 @@ module.exports.handler = async (event, context) => {
       bucket.name,
       object.key,
       process.env.DYNAMO_TABLE_NAME,
+      JSON.parse(process.env.DELETE_S3_FILE.toLowerCase()),
       parseInt(process.env.CONCURRENT_BATCH_SUBMITS),
       parseInt(process.env.READ_AHEAD_BATCHES),
       parseInt(process.env.MAX_ROWS_SUBMIT)

@@ -7,6 +7,7 @@ A Node.js Lambda function streams a S3 File and then imports it into DynamoDB us
 ### Environment variables passed to the function:
 
 - DYNAMO_TABLE_NAME: DynamoDB table name where we will import into
+- DELETE_S3_FILE: Delete the S3 File after importing if set to true
 - CONCURRENT_BATCH_SUBMITS: Make reference to the article, this is the amount of concurrent batch api writes made to the DynamoDB table
 - READ_AHEAD_BATCHES: Make reference to the article, this is the amount of batches that will be read from the stream before they will be sent to DynamoDB at the CONCURRENT_BATCH_SUBMITS rate. This value must be greater or equal to CONCURRENT_BATCH_SUBMITS.
 - MAX_ROWS_SUBMIT: Used for testing, setting to 0 means import everything, else stop the import when this amount of rows has been imported.
@@ -16,6 +17,7 @@ Example:
 
 ```
 DYNAMO_TABLE_NAME: 'TableName'
+DELETE_S3_FILE: true
 CONCURRENT_BATCH_SUBMITS: 20
 READ_AHEAD_BATCHES: 40
 MAX_ROWS_SUBMIT: 0
